@@ -52,25 +52,67 @@ void list_Task()
     }
 }
 
-int main(int argc, char *argv[])
+void parse_and_run(char *input)
 {
-    if (argc < 2)
-    { // argc = how many words you typed
-        printf("Usage : taskman <command> [args]\n");
-        return 1;
+    // trim the new line char off the end
+    input[strcspn(input, "\n")] = '\0';
+
+    //"quit" command
+    if (strcmp(input, "quit") == 0)
+    {
+        printf("Bye!\n");
+        free(tasks);
+        exit(0);
     }
 
-    if (strcmp(argv[1], "add") == 0 && argc >= 3)
-    {
-        add_Task(argv[2]);
-    }
-    else if (strcmp(argv[1], "list") == 0)
+    //"list" command
+    if (strcmp(input, "list") == 0)
     {
         list_Task();
+        return;
     }
-    else
+
+    //"add" command
+    if (strncmp(input, "add ", 4) == 0)
     {
-        printf("Unknown command: %s\n", argv[1]);
+        char *title = input + 4;
+
+        // strip surrounding quotes if present
+        if (title[0] == '"')
+        {
+            title++;
+            int len = strlen(title);
+            if (len > 0 && title[len - 1] == '"')
+            {
+                title[len - 1] = '\0';
+            }
+        }
+
+        add_Task(title);
+        return;
+    }
+
+    printf("Unknown command: %s\n", input);
+    return;
+}
+
+int main()
+{
+    char input[512];
+
+    printf("taskman - type 'add <task>', 'list', or 'quit'\n\n");
+
+    while (1)
+    {
+        printf("> ");
+        fflush(stdout);
+
+        if (fgets(input, sizeof(input), stdin) == NULL)
+        {
+            break;
+        }
+
+        parse_and_run(input);
     }
 
     free(tasks);
