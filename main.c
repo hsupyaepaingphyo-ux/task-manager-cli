@@ -15,6 +15,24 @@ Task *tasks = NULL;
 int task_count = 0;    // how many tasks are currently in the list
 int task_capacity = 0; // how much space your've reserved
 
+void save_Tasks()
+{
+    FILE *f = fopen("tasks.txt", "w");
+
+    if (f == NULL)
+    {
+        printf("Error: could not save tasks.\n");
+        return;
+    }
+
+    for (int i = 0; i < task_count; i++)
+    {
+        fprintf(f, "%d|%d|%s\n", tasks[i].id, tasks[i].done, tasks[i].title);
+    }
+
+    fclose(f);
+}
+
 void add_Task(const char *title)
 {
     if (task_count == task_capacity)
@@ -32,7 +50,10 @@ void add_Task(const char *title)
     tasks[task_count] = t;
     task_count++;
 
+    save_Tasks();
+
     printf("Added task #%d\n", t.id);
+    return;
 }
 
 void list_Task()
@@ -59,6 +80,7 @@ void complete_Task(int id)
         if (tasks[i].id == id)
         {
             tasks[i].done = 1;
+            save_Tasks();
             printf("Task #%d marked done.\n", id);
             return;
         }
@@ -78,12 +100,50 @@ void delete_Task(int id)
                 tasks[j] = tasks[j + 1];
             }
             task_count--;
+            save_Tasks();
             printf("Task #%d deleted\n", id);
             return;
         }
     }
     printf("No task with id %d\n", id);
     return;
+}
+
+void load_Tasks()
+{
+    FILE *f = fopen("tasks.txt", "r");
+
+    if (f == NULL)
+    {
+        // printf("Error reading the file.");
+        return;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), f))
+    {
+        int id, done;
+        char title[MAX_TITLE];
+
+        if (sscanf(line, "%d|%d|%[^\n]", &id, &done, title) == 3)
+        {
+            if (task_count == task_capacity)
+            {
+                task_capacity = task_count == 0 ? 4 : task_capacity * 2;
+                tasks = realloc(tasks, task_capacity * sizeof(Task));
+            }
+
+            Task t;
+            t.id = id;
+            t.done = done;
+            strncpy(t.title, title, MAX_TITLE - 1);
+            t.title[MAX_TITLE - 1] = '\0';
+
+            tasks[task_count] = t;
+            task_count++;
+        }
+    }
+    fclose(f);
 }
 
 void parse_and_run(char *input)
@@ -149,6 +209,8 @@ void parse_and_run(char *input)
 int main()
 {
     char input[512];
+
+    load_Tasks();
 
     printf("taskman - type 'add <task>', 'list', 'complete, 'delete' or 'quit'\n\n");
 
