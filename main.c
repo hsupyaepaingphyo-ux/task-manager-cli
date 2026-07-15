@@ -52,6 +52,40 @@ void list_Task()
     }
 }
 
+void complete_Task(int id)
+{
+    for (int i = 0; i < task_count; i++)
+    {
+        if (tasks[i].id == id)
+        {
+            tasks[i].done = 1;
+            printf("Task #%d marked done.\n", id);
+            return;
+        }
+    }
+    printf("No task with #%d ID\n", id);
+    return;
+}
+
+void delete_Task(int id)
+{
+    for (int i = 0; i < task_count; i++)
+    {
+        if (tasks[i].id == id)
+        {
+            for (int j = i; j < task_count - 1; j++)
+            {
+                tasks[j] = tasks[j + 1];
+            }
+            task_count--;
+            printf("Task #%d deleted\n", id);
+            return;
+        }
+    }
+    printf("No task with id %d\n", id);
+    return;
+}
+
 void parse_and_run(char *input)
 {
     // trim the new line char off the end
@@ -92,6 +126,22 @@ void parse_and_run(char *input)
         return;
     }
 
+    //"complete" command
+    if (strncmp(input, "complete ", 9) == 0)
+    {
+        int id = atoi(input + 9); // atoi - "ascii to int" text to int
+        complete_Task(id);
+        return;
+    }
+
+    //"delete" command
+    if (strncmp(input, "delete ", 7) == 0)
+    {
+        int id = atoi(input + 7);
+        delete_Task(id);
+        return;
+    }
+
     printf("Unknown command: %s\n", input);
     return;
 }
@@ -100,7 +150,7 @@ int main()
 {
     char input[512];
 
-    printf("taskman - type 'add <task>', 'list', or 'quit'\n\n");
+    printf("taskman - type 'add <task>', 'list', 'complete, 'delete' or 'quit'\n\n");
 
     while (1)
     {
