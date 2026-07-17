@@ -39,6 +39,12 @@ void add_Task(const char *title)
     { // is the bag full? > make it bigger
         task_capacity = task_capacity == 0 ? 4 : task_capacity * 2;
         tasks = realloc(tasks, task_capacity * sizeof(Task));
+
+        if (tasks == NULL)
+        {
+            printf("Error: Out of memory.");
+            exit(1);
+        }
     }
 
     Task t;
@@ -131,6 +137,12 @@ void load_Tasks()
             {
                 task_capacity = task_count == 0 ? 4 : task_capacity * 2;
                 tasks = realloc(tasks, task_capacity * sizeof(Task));
+
+                if (tasks == NULL)
+                {
+                    printf("Error : Out of memory.");
+                    exit(1);
+                }
             }
 
             Task t;
