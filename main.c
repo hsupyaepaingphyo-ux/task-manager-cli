@@ -15,14 +15,14 @@ Task *tasks = NULL;
 int task_count = 0;    // how many tasks are currently in the list
 int task_capacity = 0; // how much space your've reserved
 
-void save_Tasks()
+int save_Tasks()
 {
     FILE *f = fopen("tasks.txt", "w");
 
     if (f == NULL)
     {
         printf("Error: could not save tasks.\n");
-        return;
+        return 0;
     }
 
     for (int i = 0; i < task_count; i++)
@@ -31,6 +31,7 @@ void save_Tasks()
     }
 
     fclose(f);
+    return 1;
 }
 
 void add_Task(const char *title)
@@ -56,7 +57,10 @@ void add_Task(const char *title)
     tasks[task_count] = t;
     task_count++;
 
-    save_Tasks();
+    if (!save_Tasks())
+    {
+        return;
+    }
 
     printf("Added task #%d\n", t.id);
     return;
@@ -86,7 +90,10 @@ void complete_Task(int id)
         if (tasks[i].id == id)
         {
             tasks[i].done = 1;
-            save_Tasks();
+            if (!save_Tasks())
+            {
+                return;
+            }
             printf("Task #%d marked done.\n", id);
             return;
         }
@@ -106,7 +113,11 @@ void delete_Task(int id)
                 tasks[j] = tasks[j + 1];
             }
             task_count--;
-            save_Tasks();
+
+            if (!save_Tasks())
+            {
+                return;
+            }
             printf("Task #%d deleted\n", id);
             return;
         }
